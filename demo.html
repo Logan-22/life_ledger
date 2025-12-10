@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Life Ledger - Demo UI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+            transition: transform 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            font-size: 14px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .result pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        
+        .success {
+            border-left-color: #28a745;
+        }
+        
+        .error {
+            border-left-color: #dc3545;
+        }
+        
+        .habits-list {
+            margin-top: 15px;
+        }
+        
+        .habit-item {
+            background: #f8f9fa;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .streak-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 Life Ledger Demo</h1>
+        
+        <div class="grid">
+            <!-- Create Habit Card -->
+            <div class="card">
+                <h2>➕ Create Habit</h2>
+                <div class="form-group">
+                    <label for="habitName">Habit Name</label>
+                    <input type="text" id="habitName" placeholder="e.g., Morning Exercise">
+                </div>
+                <div class="form-group">
+                    <label for="habitDesc">Description</label>
+                    <textarea id="habitDesc" rows="2" placeholder="Details about the habit..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="habitFreq">Frequency</label>
+                    <select id="habitFreq">
+                        <option value="daily">Daily</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="custom">Custom</option>
+                    </select>
+                </div>
+                <button onclick="createHabit()">Create Habit</button>
+                <div id="habitResult" class="result" style="display:none;"></div>
+            </div>
+            
+            <!-- View Habits Card -->
+            <div class="card">
+                <h2>📋 My Habits</h2>
+                <button onclick="loadHabits()">Refresh Habits</button>
+                <div id="habitsList" class="habits-list"></div>
+            </div>
+            
+            <!-- Log Habit Card -->
+            <div class="card">
+                <h2>✅ Log Habit Completion</h2>
+                <div class="form-group">
+                    <label for="logHabitId">Habit ID</label>
+                    <input type="number" id="logHabitId" placeholder="Enter habit ID">
+                </div>
+                <div class="form-group">
+                    <label for="logNotes">Notes (optional)</label>
+                    <textarea id="logNotes" rows="2" placeholder="How did it go?"></textarea>
+                </div>
+                <button onclick="logHabit()">Log Completion</button>
+                <div id="logResult" class="result" style="display:none;"></div>
+            </div>
+            
+            <!-- Create Diet Entry Card -->
+            <div class="card">
+                <h2>🍽️ Log Diet Entry</h2>
+                <div class="form-group">
+                    <label for="mealType">Meal Type</label>
+                    <select id="mealType">
+                        <option value="breakfast">Breakfast</option>
+                        <option value="lunch">Lunch</option>
+                        <option value="dinner">Dinner</option>
+                        <option value="snack">Snack</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="foodItem">Food Item</label>
+                    <input type="text" id="foodItem" placeholder="e.g., Chicken Salad">
+                </div>
+                <div class="form-group">
+                    <label for="calories">Calories</label>
+                    <input type="number" id="calories" placeholder="e.g., 450">
+                </div>
+                <div class="form-group">
+                    <label for="protein">Protein (g)</label>
+                    <input type="number" id="protein" step="0.1" placeholder="e.g., 35">
+                </div>
+                <button onclick="createDietEntry()">Log Food</button>
+                <div id="dietResult" class="result" style="display:none;"></div>
+            </div>
+            
+            <!-- Diet Summary Card -->
+            <div class="card">
+                <h2>📈 Diet Summary</h2>
+                <button onclick="getDietSummary()">Get Today's Summary</button>
+                <div id="summaryResult" class="result" style="display:none;"></div>
+            </div>
+            
+            <!-- API Status Card -->
+            <div class="card">
+                <h2>🔌 API Status</h2>
+                <button onclick="checkHealth()">Check API Health</button>
+                <div id="healthResult" class="result" style="display:none;"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const API_BASE = 'http://localhost:5000';
+        
+        function showResult(elementId, data, isError = false) {
+            const element = document.getElementById(elementId);
+            element.style.display = 'block';
+            element.className = isError ? 'result error' : 'result success';
+            element.innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+        }
+        
+        async function createHabit() {
+            const name = document.getElementById('habitName').value;
+            const description = document.getElementById('habitDesc').value;
+            const frequency = document.getElementById('habitFreq').value;
+            
+            if (!name) {
+                showResult('habitResult', { error: 'Name is required' }, true);
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/personal/habits`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, description, frequency, target_count: 1 })
+                });
+                const data = await response.json();
+                showResult('habitResult', data, !response.ok);
+                if (response.ok) {
+                    document.getElementById('habitName').value = '';
+                    document.getElementById('habitDesc').value = '';
+                    loadHabits();
+                }
+            } catch (error) {
+                showResult('habitResult', { error: error.message }, true);
+            }
+        }
+        
+        async function loadHabits() {
+            try {
+                const response = await fetch(`${API_BASE}/api/personal/habits`);
+                const habits = await response.json();
+                
+                const list = document.getElementById('habitsList');
+                if (habits.length === 0) {
+                    list.innerHTML = '<p>No habits yet. Create one above!</p>';
+                } else {
+                    list.innerHTML = habits.map(h => `
+                        <div class="habit-item">
+                            <div>
+                                <strong>#${h.id} ${h.name}</strong>
+                                <br><small>${h.description || ''}</small>
+                            </div>
+                            <span class="streak-badge">${h.frequency}</span>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                document.getElementById('habitsList').innerHTML = 
+                    '<p style="color: red;">Error loading habits: ' + error.message + '</p>';
+            }
+        }
+        
+        async function logHabit() {
+            const habitId = document.getElementById('logHabitId').value;
+            const notes = document.getElementById('logNotes').value;
+            
+            if (!habitId) {
+                showResult('logResult', { error: 'Habit ID is required' }, true);
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/personal/habits/${habitId}/log`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ notes })
+                });
+                const data = await response.json();
+                showResult('logResult', data, !response.ok);
+                if (response.ok) {
+                    document.getElementById('logNotes').value = '';
+                }
+            } catch (error) {
+                showResult('logResult', { error: error.message }, true);
+            }
+        }
+        
+        async function createDietEntry() {
+            const meal_type = document.getElementById('mealType').value;
+            const food_item = document.getElementById('foodItem').value;
+            const calories = parseInt(document.getElementById('calories').value) || null;
+            const protein = parseFloat(document.getElementById('protein').value) || null;
+            
+            if (!food_item) {
+                showResult('dietResult', { error: 'Food item is required' }, true);
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/personal/diet`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ meal_type, food_item, calories, protein })
+                });
+                const data = await response.json();
+                showResult('dietResult', data, !response.ok);
+                if (response.ok) {
+                    document.getElementById('foodItem').value = '';
+                    document.getElementById('calories').value = '';
+                    document.getElementById('protein').value = '';
+                }
+            } catch (error) {
+                showResult('dietResult', { error: error.message }, true);
+            }
+        }
+        
+        async function getDietSummary() {
+            try {
+                const response = await fetch(`${API_BASE}/api/personal/diet/summary`);
+                const data = await response.json();
+                showResult('summaryResult', data, !response.ok);
+            } catch (error) {
+                showResult('summaryResult', { error: error.message }, true);
+            }
+        }
+        
+        async function checkHealth() {
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                showResult('healthResult', data, !response.ok);
+            } catch (error) {
+                showResult('healthResult', { error: error.message }, true);
+            }
+        }
+        
+        // Load habits on page load
+        window.addEventListener('load', () => {
+            loadHabits();
+            checkHealth();
+        });
+    </script>
+</body>
+</html>

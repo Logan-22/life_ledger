@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Life Ledger - Track Your Life</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <!-- Login/Register Screen -->
+    <div id="authScreen" class="auth-screen">
+        <div class="auth-container">
+            <div class="auth-card">
+                <div class="logo">
+                    <i class="fas fa-book-open"></i>
+                    <h1>Life Ledger</h1>
+                    <p>Track Everything That Matters</p>
+                </div>
+                
+                <!-- Login Form -->
+                <div id="loginForm" class="auth-form">
+                    <h2>Welcome Back</h2>
+                    <div class="form-group">
+                        <label><i class="fas fa-user"></i> Username</label>
+                        <input type="text" id="loginUsername" placeholder="Enter your username">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-lock"></i> Password</label>
+                        <input type="password" id="loginPassword" placeholder="Enter your password">
+                    </div>
+                    <button onclick="login()" class="btn-primary">
+                        <i class="fas fa-sign-in-alt"></i> Login
+                    </button>
+                    <p class="auth-switch">
+                        Don't have an account? <a href="#" onclick="showRegister()">Register</a>
+                    </p>
+                </div>
+                
+                <!-- Register Form -->
+                <div id="registerForm" class="auth-form" style="display:none;">
+                    <h2>Create Account</h2>
+                    <div class="form-group">
+                        <label><i class="fas fa-user"></i> Username</label>
+                        <input type="text" id="regUsername" placeholder="Choose a username">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-envelope"></i> Email</label>
+                        <input type="email" id="regEmail" placeholder="Enter your email">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-lock"></i> Password</label>
+                        <input type="password" id="regPassword" placeholder="Choose a password">
+                    </div>
+                    <button onclick="register()" class="btn-primary">
+                        <i class="fas fa-user-plus"></i> Register
+                    </button>
+                    <p class="auth-switch">
+                        Already have an account? <a href="#" onclick="showLogin()">Login</a>
+                    </p>
+                </div>
+                
+                <div id="authMessage" class="message" style="display:none;"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Main App -->
+    <div id="mainApp" style="display:none;">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <i class="fas fa-book-open"></i>
+                <h2>Life Ledger</h2>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" onclick="navigateTo('dashboard')" data-category="dashboard">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="nav-item" onclick="navigateTo('personal')" data-category="personal">
+                    <i class="fas fa-user"></i>
+                    <span>Personal</span>
+                </a>
+                <a href="#" class="nav-item" onclick="navigateTo('finance')" data-category="finance">
+                    <i class="fas fa-wallet"></i>
+                    <span>Finance</span>
+                </a>
+                <a href="#" class="nav-item disabled" title="Coming soon">
+                    <i class="fas fa-dumbbell"></i>
+                    <span>Fitness</span>
+                    <span class="badge">Soon</span>
+                </a>
+                <a href="#" class="nav-item disabled" title="Coming soon">
+                    <i class="fas fa-briefcase"></i>
+                    <span>Work</span>
+                    <span class="badge">Soon</span>
+                </a>
+                <a href="#" class="nav-item disabled" title="Coming soon">
+                    <i class="fas fa-graduation-cap"></i>
+                    <span>Learning</span>
+                    <span class="badge">Soon</span>
+                </a>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <i class="fas fa-user-circle"></i>
+                    <div>
+                        <div class="username" id="sidebarUsername">User</div>
+                        <small id="sidebarEmail">user@example.com</small>
+                    </div>
+                </div>
+                <button onclick="logout()" class="btn-logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-bar">
+                <button class="menu-toggle" onclick="toggleSidebar()">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h1 id="pageTitle">Dashboard</h1>
+                <div class="top-actions">
+                    <button class="btn-icon" title="Notifications">
+                        <i class="fas fa-bell"></i>
+                    </button>
+                    <button class="btn-icon" title="Settings">
+                        <i class="fas fa-cog"></i>
+                    </button>
+                </div>
+            </header>
+            
+            <div class="content-area">
+                <!-- Dashboard -->
+                <div id="dashboardView" class="view active">
+                    <div class="welcome-banner">
+                        <h2>Welcome back, <span id="welcomeUsername">User</span>! 👋</h2>
+                        <p>Here's your overview</p>
+                    </div>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-card purple">
+                            <i class="fas fa-check-circle"></i>
+                            <div>
+                                <h3 id="totalHabits">0</h3>
+                                <p>Active Habits</p>
+                            </div>
+                        </div>
+                        <div class="stat-card orange">
+                            <i class="fas fa-fire"></i>
+                            <div>
+                                <h3 id="longestStreak">0</h3>
+                                <p>Longest Streak</p>
+                            </div>
+                        </div>
+                        <div class="stat-card green">
+                            <i class="fas fa-utensils"></i>
+                            <div>
+                                <h3 id="todayMeals">0</h3>
+                                <p>Meals Today</p>
+                            </div>
+                        </div>
+                        <div class="stat-card blue">
+                            <i class="fas fa-bolt"></i>
+                            <div>
+                                <h3 id="todayCalories">0</h3>
+                                <p>Calories Today</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="dashboard-grid">
+                        <div class="card">
+                            <h3><i class="fas fa-trophy"></i> Recent Achievements</h3>
+                            <div id="recentAchievements" class="achievements-list">
+                                <div class="empty-state">
+                                    <i class="fas fa-medal"></i>
+                                    <p>Complete habits to earn achievements!</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <h3><i class="fas fa-chart-line"></i> Your Progress</h3>
+                            <div id="progressInfo">
+                                <div class="empty-state">
+                                    <i class="fas fa-chart-pie"></i>
+                                    <p>Start tracking to see your progress!</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Personal Category -->
+                <div id="personalView" class="view">
+                    <div class="category-tabs">
+                        <button class="tab-btn active" onclick="switchTab('habits')">
+                            <i class="fas fa-check-circle"></i> Habits
+                        </button>
+                        <button class="tab-btn" onclick="switchTab('diet')">
+                            <i class="fas fa-utensils"></i> Diet
+                        </button>
+                        <button class="tab-btn" onclick="switchTab('analytics')">
+                            <i class="fas fa-chart-line"></i> Analytics
+                        </button>
+                        <button class="tab-btn" onclick="switchTab('manageHabits')">
+                            <i class="fas fa-cog"></i> Manage Habits
+                        </button>
+                        <button class="tab-btn" onclick="openCalorieGoalModal()">
+                            <i class="fas fa-bullseye"></i> Set Calorie Goal
+                        </button>
+                    </div>
+                    
+                    <!-- Habits Tab -->
+                    <div id="habitsTab" class="tab-content active">
+                        <!-- Habit Calendar Section -->
+                        <div class="card full-width" style="margin-top: 20px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                                <h3><i class="fas fa-calendar-alt"></i> Habit Calendar</h3>
+                                <div class="calendar-controls">
+                                    <button onclick="previousMonth()" class="btn-icon">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </button>
+                                    <span id="currentMonth" style="margin: 0 15px; font-weight: 600; font-size: 16px;"></span>
+                                    <button onclick="nextMonth()" class="btn-icon">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Habit Checkboxes for Calendar Filter -->
+                            <div class="habit-filters" id="habitFilters" style="margin-bottom: 20px;">
+                                <!-- Will be populated dynamically -->
+                            </div>
+                            
+                            <!-- Combined Streak Display -->
+                            <div id="combinedStreakDisplay" style="margin-bottom: 20px;">
+                                <!-- Will be populated dynamically -->
+                            </div>
+                            
+                            <!-- Calendar Grid -->
+                            <div id="habitCalendar" class="habit-calendar">
+                                <!-- Will be populated dynamically -->
+                            </div>
+                            
+                            <div style="margin-top: 15px; padding: 12px; background: var(--bg-secondary); border-radius: 8px; text-align: center; font-size: 13px; color: var(--text-secondary);">
+                                <i class="fas fa-info-circle"></i> Click any date to log habits for that day
+                            </div>
+                        </div>
+                        
+                        <!-- My Habits List -->
+                        <div class="card full-width" style="margin-top: 20px;">
+                            <h3><i class="fas fa-list"></i> My Habits</h3>
+                            <div id="habitsList"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Diet Tab -->
+                    <div id="dietTab" class="tab-content">
+                        <!-- Date Selector -->
+                        <div class="card full-width" style="margin-bottom: 20px;">
+                            <div style="display: flex; align-items: center; justify-content: space-between; gap: 15px;">
+                                <h3 style="margin: 0;"><i class="fas fa-calendar"></i> Select Date</h3>
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <button onclick="changeDietDate(-1)" class="btn-secondary" style="padding: 8px 12px;">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </button>
+                                    <input type="date" id="dietDate" onchange="loadDietForDate()" style="padding: 8px 12px; border: 2px solid var(--border); border-radius: 8px; background: var(--bg-secondary); color: var(--text-primary); font-size: 14px; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-weight: 500;">
+                                    <button onclick="changeDietDate(1)" class="btn-secondary" style="padding: 8px 12px;">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </button>
+                                    <button onclick="setDietDateToday()" class="btn-primary" style="padding: 8px 16px; font-size: 14px;">
+                                        <i class="fas fa-calendar-day"></i> Today
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="content-grid">
+                            <div class="card">
+                                <h3><i class="fas fa-plus-circle"></i> Log Food</h3>
+                                <div class="form-group">
+                                    <label>Food Item *</label>
+                                    <input type="text" id="foodItem" placeholder="e.g., Chicken Breast" onkeypress="if(event.key==='Enter'){lookupNutrition();event.preventDefault();}">
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Quantity</label>
+                                        <input type="number" id="quantity" placeholder="100" value="100">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Unit</label>
+                                        <select id="unit">
+                                            <option value="g">Grams (g)</option>
+                                            <option value="oz">Ounce (oz)</option>
+                                            <option value="cup">Cup</option>
+                                            <option value="serving">Serving</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <button onclick="lookupNutrition()" class="btn-secondary">
+                                    <i class="fas fa-search"></i> Lookup Nutrition
+                                </button>
+                                
+                                <!-- Food Search Results Dropdown -->
+                                <div id="foodResultsContainer" style="display: none; margin: 20px 0;">
+                                    <label style="margin-bottom: 10px; display: block; font-weight: 600;">Select Food Item:</label>
+                                    <select id="foodResults" class="food-results-dropdown" onchange="selectFoodItem()" size="5">
+                                        <!-- Options populated by JavaScript -->
+                                    </select>
+                                    <div id="foodResultsInfo" style="margin-top: 8px; font-size: 0.9em; color: var(--text-secondary);"></div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label>Meal Type</label>
+                                    <select id="mealType">
+                                        <option value="breakfast">🌅 Breakfast</option>
+                                        <option value="lunch">☀️ Lunch</option>
+                                        <option value="dinner">🌙 Dinner</option>
+                                        <option value="snack">🍪 Snack</option>
+                                    </select>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Calories</label>
+                                        <input type="number" id="calories" placeholder="Auto-filled">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Protein (g)</label>
+                                        <input type="number" id="protein" step="0.1" placeholder="Auto-filled">
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Carbs (g)</label>
+                                        <input type="number" id="carbs" step="0.1" placeholder="Auto-filled">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Fats (g)</label>
+                                        <input type="number" id="fats" step="0.1" placeholder="Auto-filled">
+                                    </div>
+                                </div>
+                                
+                                <!-- Detailed Nutrients (collapsible) -->
+                                <details style="margin: 15px 0;">
+                                    <summary style="cursor: pointer; color: var(--primary); font-weight: 600; padding: 10px; background: var(--bg-main); border-radius: 8px;">
+                                        <i class="fas fa-plus-circle"></i> Add Detailed Nutrients (Optional)
+                                    </summary>
+                                    <div style="margin-top: 15px; padding: 15px; background: var(--bg-main); border-radius: 8px;">
+                                        <div class="form-row">
+                                            <div class="form-group">
+                                                <label>Sugar (g)</label>
+                                                <input type="number" id="sugar" step="0.1" placeholder="Auto-filled">
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Fiber (g)</label>
+                                                <input type="number" id="fiber" step="0.1" placeholder="Auto-filled">
+                                            </div>
+                                        </div>
+                                        <div class="form-row">
+                                            <div class="form-group">
+                                                <label>Saturated Fat (g)</label>
+                                                <input type="number" id="saturatedFat" step="0.1" placeholder="Auto-filled">
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Unsaturated Fat (g)</label>
+                                                <input type="number" id="unsaturatedFat" step="0.1" placeholder="Auto-filled">
+                                            </div>
+                                        </div>
+                                        <div class="form-row">
+                                            <div class="form-group">
+                                                <label>Calcium (mg)</label>
+                                                <input type="number" id="calcium" step="0.1" placeholder="Auto-filled">
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Iron (mg)</label>
+                                                <input type="number" id="iron" step="0.1" placeholder="Auto-filled">
+                                            </div>
+                                        </div>
+                                        <div class="form-row">
+                                            <div class="form-group">
+                                                <label>Magnesium (mg)</label>
+                                                <input type="number" id="magnesium" step="0.1" placeholder="Auto-filled">
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Sodium (mg)</label>
+                                                <input type="number" id="sodium" step="0.1" placeholder="Auto-filled">
+                                            </div>
+                                        </div>
+                                        <div class="form-row">
+                                            <div class="form-group">
+                                                <label>Potassium (mg)</label>
+                                                <input type="number" id="potassium" step="0.1" placeholder="Auto-filled">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </details>
+                                
+                                <button onclick="createDietEntry()" class="btn-primary">
+                                    <i class="fas fa-check"></i> Log Food
+                                </button>
+                                <div id="nutritionMessage" class="message" style="display:none;"></div>
+                            </div>
+                            
+                            <div class="card wide">
+                                <h3><i class="fas fa-chart-pie"></i> Today's Nutrition</h3>
+                                
+                                <!-- Calorie Progress Bar -->
+                                <div id="calorieProgressSection" style="margin-bottom: 20px; display: none;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                        <span style="font-weight: 500;"><i class="fas fa-fire"></i> Calorie Progress</span>
+                                        <span id="calorieProgressText" style="font-weight: 600; font-size: 16px;">0 / 2000 cal (0%)</span>
+                                    </div>
+                                    <div class="progress-bar-container">
+                                        <div id="calorieProgressBar" class="progress-bar-fill" style="width: 0%;"></div>
+                                    </div>
+                                </div>
+                                
+                                <div id="nutritionStats" class="nutrition-stats"></div>
+                                
+                                <!-- Detailed Nutrients - Expandable -->
+                                <div class="detailed-nutrients-section">
+                                    <button class="expand-toggle" onclick="toggleDetailedNutrients()" id="detailedNutrientsToggle">
+                                        <i class="fas fa-chevron-down"></i> Show Detailed Nutrients
+                                    </button>
+                                    <div id="detailedNutrientsContent" class="detailed-nutrients-content" style="display: none;">
+                                        <div class="nutrient-grid">
+                                            <div class="nutrient-item">
+                                                <span class="nutrient-label"><i class="fas fa-candy-cane"></i> Sugar</span>
+                                                <span class="nutrient-value" id="todaySugar">0g</span>
+                                            </div>
+                                            <div class="nutrient-item">
+                                                <span class="nutrient-label"><i class="fas fa-leaf"></i> Fiber</span>
+                                                <span class="nutrient-value" id="todayFiber">0g</span>
+                                            </div>
+                                            <div class="nutrient-item">
+                                                <span class="nutrient-label"><i class="fas fa-bacon"></i> Saturated Fat</span>
+                                                <span class="nutrient-value" id="todaySaturatedFat">0g</span>
+                                            </div>
+                                            <div class="nutrient-item">
+                                                <span class="nutrient-label"><i class="fas fa-fish"></i> Unsaturated Fat</span>
+                                                <span class="nutrient-value" id="todayUnsaturatedFat">0g</span>
+                                            </div>
+                                            <div class="nutrient-item">
+                                                <span class="nutrient-label"><i class="fas fa-bone"></i> Calcium</span>
+                                                <span class="nutrient-value" id="todayCalcium">0mg</span>
+                                            </div>
+                                            <div class="nutrient-item">
+                                                <span class="nutrient-label"><i class="fas fa-dumbbell"></i> Iron</span>
+                                                <span class="nutrient-value" id="todayIron">0mg</span>
+                                            </div>
+                                            <div class="nutrient-item">
+                                                <span class="nutrient-label"><i class="fas fa-atom"></i> Magnesium</span>
+                                                <span class="nutrient-value" id="todayMagnesium">0mg</span>
+                                            </div>
+                                            <div class="nutrient-item">
+                                                <span class="nutrient-label"><i class="fas fa-salt-shaker"></i> Sodium</span>
+                                                <span class="nutrient-value" id="todaySodium">0mg</span>
+                                            </div>
+                                            <div class="nutrient-item">
+                                                <span class="nutrient-label"><i class="fas fa-seedling"></i> Potassium</span>
+                                                <span class="nutrient-value" id="todayPotassium">0mg</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div id="dietList" class="diet-list"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Habit Details Tab -->
+                    <div id="habitDetailsTab" class="tab-content">
+                        <div class="page-header">
+                            <button onclick="switchTab('habits')" class="btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Back to Habits
+                            </button>
+                        </div>
+                        <div id="habitDetailsContent" class="content-grid">
+                            <!-- Will be populated dynamically -->
+                        </div>
+                    </div>
+                    
+                    <!-- Analytics Tab -->
+                    <div id="analyticsTab" class="tab-content">
+                        <div class="card full-width">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                                <h3><i class="fas fa-chart-line"></i> Calorie Trends</h3>
+                                <div style="display: flex; gap: 10px;">
+                                    <select id="analyticsRange" onchange="loadCalorieAnalytics()" style="padding: 8px 12px; border: 2px solid var(--border); border-radius: 8px; background: var(--bg-secondary); color: var(--text-primary); font-size: 14px;">
+                                        <option value="7">Last 7 Days</option>
+                                        <option value="14">Last 14 Days</option>
+                                        <option value="30" selected>Last 30 Days</option>
+                                        <option value="90">Last 90 Days</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div style="position: relative; height: 400px; width: 100%;">
+                                <canvas id="calorieChart"></canvas>
+                            </div>
+                            <div style="margin-top: 20px; padding: 15px; background: var(--bg-secondary); border-radius: 8px;">
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                                    <div>
+                                        <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">Average Daily Calories</div>
+                                        <div style="font-size: 20px; font-weight: 600;" id="avgCalories">-</div>
+                                    </div>
+                                    <div>
+                                        <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">Days On Target</div>
+                                        <div style="font-size: 20px; font-weight: 600;" id="daysOnTarget">-</div>
+                                    </div>
+                                    <div>
+                                        <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">Days Over Target</div>
+                                        <div style="font-size: 20px; font-weight: 600;" id="daysOverTarget">-</div>
+                                    </div>
+                                    <div>
+                                        <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">Current Streak</div>
+                                        <div style="font-size: 20px; font-weight: 600;" id="calorieStreak">-</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Manage Habits Tab -->
+                    <div id="manageHabitsTab" class="tab-content">
+                        <div class="card">
+                            <h3><i class="fas fa-plus-circle"></i> Create New Habit</h3>
+                            <div class="form-row">
+                                <div class="form-group" style="flex: 2;">
+                                    <label>Habit Name *</label>
+                                    <input type="text" id="habitName" placeholder="e.g., Morning Meditation" oninput="generateAcronym()">
+                                </div>
+                                <div class="form-group" style="flex: 1;">
+                                    <label>Acronym * <span style="font-size: 11px; color: var(--text-secondary);">(2-3 chars)</span></label>
+                                    <input type="text" id="habitAcronym" placeholder="MM" maxlength="3" style="text-transform: uppercase;">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Description</label>
+                                <textarea id="habitDesc" rows="2" placeholder="What's this habit about?"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Frequency</label>
+                                <select id="habitFreq">
+                                    <option value="daily">Daily</option>
+                                    <option value="weekly">Weekly</option>
+                                    <option value="custom">Custom</option>
+                                </select>
+                            </div>
+                            <button onclick="createHabit()" class="btn-primary">
+                                <i class="fas fa-plus"></i> Create Habit
+                            </button>
+                        </div>
+                        
+                        <div class="card full-width" style="margin-top: 20px;">
+                            <h3><i class="fas fa-cog"></i> Manage All Habits</h3>
+                            <p style="color: var(--text-secondary); margin-bottom: 20px;">Edit or delete your habits</p>
+                            <div id="manageHabitsList"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Finance View -->
+            <div id="financeView" class="view" style="display: none;">
+                <!-- Hero Section -->
+                <div class="finance-hero">
+                    <div class="hero-content">
+                        <div class="hero-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h1 class="hero-title">Portfolio Tracker</h1>
+                        <p class="hero-subtitle">Track your investments, monitor performance, and grow your wealth</p>
+                        <button onclick="openAddInvestmentModal()" class="btn-hero">
+                            <i class="fas fa-plus-circle"></i> Add Your First Investment
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Portfolio Summary Card -->
+                <div class="card full-width finance-card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                        <div>
+                            <h2 style="margin: 0; font-size: 22px; font-weight: 600;"><i class="fas fa-chart-pie" style="margin-right: 10px; color: var(--primary);"></i>Portfolio Overview</h2>
+                            <p style="margin: 5px 0 0 0; color: var(--text-secondary); font-size: 14px;">Real-time snapshot of your investments</p>
+                        </div>
+                        <button onclick="openAddInvestmentModal()" class="btn-primary" style="padding: 12px 24px; font-size: 15px;">
+                            <i class="fas fa-plus"></i> Add Investment
+                        </button>
+                    </div>
+                    
+                    <div id="portfolioStats" class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px;">
+                        <div class="stat-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none;">
+                            <i class="fas fa-coins stat-icon" style="color: white;"></i>
+                            <div class="stat-value" id="totalInvested" style="color: white;">₹0</div>
+                            <div class="stat-label" style="color: rgba(255,255,255,0.9);">Total Invested</div>
+                        </div>
+                        <div class="stat-card" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none;">
+                            <i class="fas fa-wallet stat-icon" style="color: white;"></i>
+                            <div class="stat-value" id="currentValue" style="color: white;">₹0</div>
+                            <div class="stat-label" style="color: rgba(255,255,255,0.9);">Current Value</div>
+                        </div>
+                        <div class="stat-card" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border: none;">
+                            <i class="fas fa-chart-line stat-icon" style="color: white;"></i>
+                            <div class="stat-value" id="totalReturns" style="color: white;">₹0</div>
+                            <div class="stat-label" style="color: rgba(255,255,255,0.9);">Total Returns</div>
+                        </div>
+                        <div class="stat-card" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); border: none;">
+                            <i class="fas fa-percentage stat-icon" style="color: white;"></i>
+                            <div class="stat-value" id="returnsPercent" style="color: white;">0%</div>
+                            <div class="stat-label" style="color: rgba(255,255,255,0.9);">Returns %</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Allocation Chart -->
+                <div class="card full-width finance-card" style="margin-top: 25px;">
+                    <h3 style="margin: 0 0 20px 0; font-size: 20px; font-weight: 600;"><i class="fas fa-chart-pie" style="margin-right: 10px; color: var(--primary);"></i>Asset Allocation</h3>
+                    <div id="allocationChartContainer" style="height: 320px; display: flex; align-items: center; justify-content: center;">
+                        <canvas id="allocationChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Investments List -->
+                <div class="card full-width finance-card" style="margin-top: 25px;">
+                    <h3 style="margin: 0 0 20px 0; font-size: 20px; font-weight: 600;"><i class="fas fa-list" style="margin-right: 10px; color: var(--primary);"></i>Your Investments</h3>
+                    <div id="investmentsList"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Habit Log Modal -->
+    <div id="habitLogModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="habitLogModalTitle">Log Habits</h3>
+                <button class="modal-close" onclick="closeHabitLogModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label style="font-weight: 600; color: var(--primary);">Date</label>
+                    <input type="text" id="logDate" readonly style="background: var(--bg-hover); color: var(--text-primary); font-weight: 600; font-size: 16px; border: 2px solid var(--primary); cursor: not-allowed;">
+                </div>
+                <div class="form-group">
+                    <label>Select Habits to Log</label>
+                    <div id="habitCheckboxList" class="checkbox-list"></div>
+                </div>
+                <div class="form-group">
+                    <label>Notes (Optional)</label>
+                    <textarea id="logNotes" rows="3" placeholder="Add notes for this log..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeHabitLogModal()">Cancel</button>
+                <button class="btn-primary" onclick="submitHabitLog()">
+                    <i class="fas fa-save"></i> Save Changes
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Motivational Quote Modal -->
+    <div id="motivationModal" class="modal">
+        <div class="modal-content motivation-modal">
+            <button class="modal-close" onclick="closeMotivationModal()">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="motivation-content">
+                <div class="motivation-icon">
+                    <i class="fas fa-trophy"></i>
+                </div>
+                <h2 class="motivation-title">Great Job!</h2>
+                <p class="motivation-message" id="motivationMessage"></p>
+                <div class="motivation-quote">
+                    <i class="fas fa-quote-left quote-icon"></i>
+                    <p class="quote-text" id="quoteText">Loading...</p>
+                    <p class="quote-author" id="quoteAuthor"></p>
+                </div>
+                <button class="btn-primary" onclick="closeMotivationModal()" style="width: 100%; margin-top: 20px;">
+                    <i class="fas fa-check"></i> Continue
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Edit Habit Logs Modal -->
+    <div id="editLogsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Edit Habit Logs</h3>
+                <button class="modal-close" onclick="closeEditLogsModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label style="font-weight: 600; color: var(--primary);">Date</label>
+                    <input type="text" id="editLogDate" readonly style="background: var(--bg-hover); color: var(--text-primary); font-weight: 600; font-size: 16px; border: 2px solid var(--primary); cursor: not-allowed;">
+                </div>
+                <div id="existingLogsList" class="existing-logs-list"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeEditLogsModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Calorie Goal Modal -->
+    <div id="calorieGoalModal" class="modal" style="display: none; align-items: center; justify-content: center;">
+        <div class="modal-content" style="max-width: 450px; padding: 30px;">
+            <div style="text-align: center; margin-bottom: 25px;">
+                <div style="display: inline-block; padding: 15px; background: linear-gradient(135deg, #3b82f6, #10b981); border-radius: 50%; margin-bottom: 15px;">
+                    <i class="fas fa-bullseye" style="font-size: 32px; color: white;"></i>
+                </div>
+                <h2 style="margin: 0; font-size: 24px;">Set Daily Calorie Goal</h2>
+                <p style="color: var(--text-secondary); margin-top: 8px; font-size: 14px;">Enter your target daily calorie intake</p>
+            </div>
+            
+            <div class="form-group">
+                <label style="font-weight: 500; font-size: 14px; margin-bottom: 8px; display: block;">Calorie Goal (500-10000)</label>
+                <input type="number" id="calorieGoalModalInput" placeholder="2000" min="500" max="10000" 
+                       style="width: 100%; font-size: 18px; padding: 14px; text-align: center; border: 2px solid var(--border); border-radius: 8px; background: var(--bg-secondary); color: var(--text-primary);">
+            </div>
+            
+            <div style="display: flex; gap: 12px; margin-top: 25px;">
+                <button onclick="closeCalorieGoalModal()" class="btn-secondary" style="flex: 1;">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+                <button onclick="saveCalorieGoal()" class="btn-primary" style="flex: 1;">
+                    <i class="fas fa-save"></i> Save Goal
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Investment Modal -->
+    <div id="addInvestmentModal" class="modal" style="display: none; align-items: center; justify-content: center; overflow-y: auto; padding: 20px;">
+        <div class="modal-content investment-modal-content" style="max-width: 650px; width: 100%; padding: 0; margin: 20px auto; max-height: 90vh; overflow-y: auto; border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+            <!-- Modal Header -->
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 16px 16px 0 0; position: relative;">
+                <button onclick="closeAddInvestmentModal()" class="modal-close" style="position: absolute; top: 15px; right: 15px; background: rgba(255,255,255,0.2); border: none; color: white; cursor: pointer; font-size: 20px; padding: 8px 12px; border-radius: 8px; transition: all 0.2s; backdrop-filter: blur(10px);">
+                    <i class="fas fa-times"></i>
+                </button>
+                <div style="text-align: center;">
+                    <div style="display: inline-block; padding: 15px; background: rgba(255, 255, 255, 0.2); border-radius: 50%; margin-bottom: 15px; backdrop-filter: blur(10px);">
+                        <i class="fas fa-chart-line" style="font-size: 32px; color: white;"></i>
+                    </div>
+                    <h2 style="margin: 0; font-size: 28px; color: white; font-weight: 700;">Add Investment</h2>
+                    <p style="color: rgba(255,255,255,0.9); margin-top: 8px; font-size: 15px;">Track your portfolio with real-time data</p>
+                </div>
+            </div>
+            
+            <!-- Modal Body -->
+            <div style="padding: 30px; background: var(--bg-secondary);">
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 8px; font-size: 14px; color: var(--text-primary);">Instrument Type *</label>
+                    <select id="investmentType" class="investment-select" style="width: 100%; padding: 14px; border: 2px solid var(--border); border-radius: 10px; background: var(--bg-primary); color: var(--text-primary); font-family: 'Inter', sans-serif; font-size: 15px; transition: all 0.2s;">
+                        <option value="stock">📈 Stock</option>
+                        <option value="mutual_fund">📊 Mutual Fund</option>
+                        <option value="fd">🏦 Fixed Deposit</option>
+                        <option value="rd">💰 Recurring Deposit</option>
+                        <option value="gold">⚜️ Gold</option>
+                        <option value="crypto">₿ Cryptocurrency</option>
+                        <option value="bond">📜 Bond</option>
+                        <option value="other">📌 Other</option>
+                    </select>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 8px; font-size: 14px; color: var(--text-primary);">Stock Symbol *</label>
+                    <input type="text" id="investmentSymbol" placeholder="RELIANCE.NS, TCS.NS, INFY.NS" style="width: 100%; padding: 12px 14px; border: 2px solid var(--border); border-radius: 10px; background: var(--bg-primary); color: var(--text-primary); font-family: 'Inter', sans-serif; font-size: 15px; text-transform: uppercase; transition: all 0.2s; margin-bottom: 12px;">
+                    <button type="button" onclick="fetchStockPrice()" class="btn-primary" style="width: 100%; padding: 12px; border-radius: 10px; font-weight: 600; font-size: 14px;">
+                        <i class="fas fa-download"></i> Fetch Price
+                    </button>
+                    <small style="color: var(--text-secondary); font-size: 13px; margin-top: 8px; display: block; line-height: 1.5;">
+                        <i class="fas fa-lightbulb" style="color: #f59e0b;"></i> Add .NS for NSE or .BO for BSE (e.g., RELIANCE.NS)
+                    </small>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 8px; font-size: 14px; color: var(--text-primary);">Investment Name</label>
+                    <input type="text" id="investmentName" placeholder="Reliance Industries, Tata Consultancy Services" style="width: 100%; padding: 14px 16px; border: 2px solid var(--border); border-radius: 10px; background: var(--bg-primary); color: var(--text-primary); font-family: 'Inter', sans-serif; font-size: 15px;">
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                    <div class="form-group">
+                        <label style="display: block; font-weight: 600; margin-bottom: 8px; font-size: 14px; color: var(--text-primary);">Purchase Date *</label>
+                        <input type="date" id="investmentBuyDate" onchange="fetchHistoricalPrice()" style="width: 100%; padding: 14px 16px; border: 2px solid var(--border); border-radius: 10px; background: var(--bg-primary); color: var(--text-primary); font-family: 'Inter', sans-serif; font-size: 15px;">
+                    </div>
+                    <div class="form-group">
+                        <label style="display: block; font-weight: 600; margin-bottom: 8px; font-size: 14px; color: var(--text-primary);">Quantity *</label>
+                        <input type="number" id="investmentQuantity" placeholder="10" step="0.0001" min="0" style="width: 100%; padding: 14px 16px; border: 2px solid var(--border); border-radius: 10px; background: var(--bg-primary); color: var(--text-primary); font-family: 'Inter', sans-serif; font-size: 15px;">
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                    <div class="form-group">
+                        <label style="display: block; font-weight: 600; margin-bottom: 8px; font-size: 14px; color: var(--text-primary);">
+                            Buy Price (₹) *
+                            <i class="fas fa-spinner fa-spin" id="buyPriceLoader" style="display: none; margin-left: 8px; color: var(--primary);"></i>
+                        </label>
+                        <input type="number" id="investmentBuyPrice" placeholder="2750.50" step="0.01" min="0" style="width: 100%; padding: 14px 16px; border: 2px solid var(--border); border-radius: 10px; background: var(--bg-primary); color: var(--text-primary); font-family: 'Inter', sans-serif; font-size: 15px; font-weight: 600;">
+                    </div>
+                    <div class="form-group">
+                        <label style="display: block; font-weight: 600; margin-bottom: 8px; font-size: 14px; color: var(--text-primary);">
+                            Current Price (₹) *
+                            <i class="fas fa-spinner fa-spin" id="currentPriceLoader" style="display: none; margin-left: 8px; color: var(--primary);"></i>
+                        </label>
+                        <input type="number" id="investmentCurrentPrice" placeholder="2850.75" step="0.01" min="0" style="width: 100%; padding: 14px 16px; border: 2px solid var(--border); border-radius: 10px; background: var(--bg-primary); color: var(--text-primary); font-family: 'Inter', sans-serif; font-size: 15px; font-weight: 600;">
+                    </div>
+                </div>
+
+                <div id="priceStatus" style="display: none; padding: 14px 16px; background: var(--bg-primary); border-radius: 10px; margin-bottom: 20px; font-size: 14px; border-left: 4px solid var(--primary);">
+                    <i class="fas fa-info-circle" style="color: var(--primary); margin-right: 10px;"></i>
+                    <span id="priceStatusText" style="font-weight: 500;"></span>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 25px;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 8px; font-size: 14px; color: var(--text-primary);">Notes <span style="font-size: 13px; color: var(--text-secondary); font-weight: 400;">(Optional)</span></label>
+                    <textarea id="investmentNotes" rows="3" placeholder="Add any notes about this investment..." style="width: 100%; padding: 14px 16px; border: 2px solid var(--border); border-radius: 10px; background: var(--bg-primary); color: var(--text-primary); resize: vertical; font-family: 'Inter', sans-serif; font-size: 14px;"></textarea>
+                </div>
+                
+                <div style="display: flex; gap: 12px; margin-top: 30px;">
+                    <button onclick="closeAddInvestmentModal()" class="btn-secondary" style="flex: 1; padding: 14px; font-size: 16px; font-weight: 600; border-radius: 10px;">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                    <button onclick="saveInvestment()" class="btn-primary" style="flex: 1; padding: 14px; font-size: 16px; font-weight: 600; border-radius: 10px; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);">
+                        <i class="fas fa-check"></i> Add Investment
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
