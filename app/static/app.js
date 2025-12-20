@@ -1362,10 +1362,14 @@ async function calculateCombinedStreak() {
         
         const habitsData = await Promise.all(habitDataPromises);
         
-        // Build a map of dates to habit IDs that were completed on each date
+        // Build a map of dates to habit IDs that were COMPLETED on each date
         const dateToHabitsMap = {};
         habitsData.forEach(habit => {
             habit.recent_logs.forEach(log => {
+                // Only count logs with 'completed' status (ignore failed/skipped)
+                if (log.status !== 'completed' && log.status !== undefined) {
+                    return; // Skip non-completed statuses
+                }
                 const dateStr = new Date(log.completed_at).toISOString().split('T')[0];
                 if (!dateToHabitsMap[dateStr]) {
                     dateToHabitsMap[dateStr] = new Set();

@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 def calculate_streak(logs):
     """
     Calculate current streak and longest streak for habit logs.
+    Only counts 'completed' status, not 'failed' or 'skipped'.
     
     Args:
         logs: List of HabitLog objects ordered by completed_at DESC
@@ -18,9 +19,12 @@ def calculate_streak(logs):
             'last_completed': None
         }
     
-    # Get unique dates from logs
+    # Filter logs to only completed status
+    completed_logs = [log for log in logs if log.status in ['completed', None]]
+    
+    # Get unique dates from completed logs
     dates = []
-    for log in logs:
+    for log in completed_logs:
         log_date = log.completed_at.date()
         if log_date not in dates:
             dates.append(log_date)
