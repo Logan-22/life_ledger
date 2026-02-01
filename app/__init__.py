@@ -4,12 +4,14 @@ from flask_migrate import Migrate
 from flask_cors import CORS
 from flask_login import LoginManager
 from flask_bcrypt import Bcrypt
+from flask_mail import Mail
 from config import config
 
 db = SQLAlchemy()
 migrate = Migrate()
 login_manager = LoginManager()
 bcrypt = Bcrypt()
+mail = Mail()
 
 
 def create_app(config_name='default'):
@@ -23,6 +25,7 @@ def create_app(config_name='default'):
     CORS(app)
     login_manager.init_app(app)
     bcrypt.init_app(app)
+    mail.init_app(app)
     
     # Login manager config
     login_manager.login_view = 'auth.login'
@@ -49,6 +52,11 @@ def create_app(config_name='default'):
     # Root endpoint - serve web UI
     @app.route('/')
     def index():
+        return app.send_static_file('index.html')
+    
+    # Reset password page
+    @app.route('/reset-password')
+    def reset_password_page():
         return app.send_static_file('index.html')
     
     # Health check

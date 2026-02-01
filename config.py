@@ -17,6 +17,15 @@ class Config:
     # Pagination
     ITEMS_PER_PAGE = 20
 
+    # Flask-Mail settings (update these for your SMTP provider)
+    MAIL_SERVER = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
+    MAIL_PORT = int(os.environ.get('MAIL_PORT', 587))
+    MAIL_USE_TLS = True
+    MAIL_USE_SSL = False
+    MAIL_USERNAME = os.environ.get('MAIL_USERNAME', 'your_gmail@gmail.com')
+    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD', 'your_gmail_app_password')
+    MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER', 'Life Ledger <your_gmail@gmail.com>')
+
 
 class DevelopmentConfig(Config):
     """Development configuration."""

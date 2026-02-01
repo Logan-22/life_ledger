@@ -1,3 +1,157 @@
+// ========== Forgot Password Modal Logic ==========
+function showForgotPasswordModal() {
+    const modal = document.getElementById('forgotPasswordModal');
+    modal.classList.add('active');
+    modal.style.display = 'flex';
+    document.getElementById('forgotEmail').value = '';
+    document.getElementById('forgotPasswordMsg').style.display = 'none';
+    document.getElementById('forgotEmail').focus();
+}
+
+function closeForgotPasswordModal() {
+    const modal = document.getElementById('forgotPasswordModal');
+    modal.classList.remove('active');
+    modal.style.display = 'none';
+}
+
+// Close modal when clicking outside the content
+document.addEventListener('click', (e) => {
+    const modal = document.getElementById('forgotPasswordModal');
+    if (e.target === modal) {
+        closeForgotPasswordModal();
+    }
+});
+
+async function submitForgotPassword() {
+    const email = document.getElementById('forgotEmail').value.trim();
+    const msgDiv = document.getElementById('forgotPasswordMsg');
+    
+    if (!email) {
+        msgDiv.style.display = 'block';
+        msgDiv.textContent = 'Please enter your email address.';
+        msgDiv.className = 'message error';
+        return;
+    }
+    
+    if (!email.includes('@')) {
+        msgDiv.style.display = 'block';
+        msgDiv.textContent = 'Please enter a valid email address.';
+        msgDiv.className = 'message error';
+        return;
+    }
+    
+    const submitBtn = event.target;
+    const originalText = submitBtn.innerHTML;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+    
+    try {
+        const response = await fetch(`${API_BASE}/api/auth/forgot-password`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email })
+        });
+        const data = await response.json();
+        msgDiv.style.display = 'block';
+        
+        if (response.ok) {
+            msgDiv.textContent = data.message || 'Reset link sent! Check your email.';
+            msgDiv.className = 'message success';
+            setTimeout(() => {
+                closeForgotPasswordModal();
+                showLogin();
+            }, 2000);
+        } else {
+            msgDiv.textContent = data.error || 'Failed to send reset link.';
+            msgDiv.className = 'message error';
+        }
+    } catch (error) {
+        msgDiv.style.display = 'block';
+        msgDiv.textContent = 'Network error: ' + error.message;
+        msgDiv.className = 'message error';
+        console.error('Forgot password error:', error);
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+    }
+}
+
+// ========== Reset Password Page Logic ==========
+function checkResetPasswordToken() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get('token');
+    
+    if (token) {
+        // Show reset password screen
+        document.getElementById('authScreen').style.display = 'none';
+        document.getElementById('resetPasswordScreen').style.display = 'flex';
+        document.getElementById('resetPassword').focus();
+        // Store token in a data attribute
+        document.getElementById('resetPasswordScreen').dataset.token = token;
+    }
+}
+
+async function submitResetPassword() {
+    const token = document.getElementById('resetPasswordScreen').dataset.token;
+    const newPassword = document.getElementById('resetPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+    const msgDiv = document.getElementById('resetPasswordMsg');
+    
+    if (!newPassword || !confirmPassword) {
+        msgDiv.style.display = 'block';
+        msgDiv.textContent = 'Please enter both passwords.';
+        msgDiv.className = 'message error';
+        return;
+    }
+    
+    if (newPassword !== confirmPassword) {
+        msgDiv.style.display = 'block';
+        msgDiv.textContent = 'Passwords do not match.';
+        msgDiv.className = 'message error';
+        return;
+    }
+    
+    if (newPassword.length < 6) {
+        msgDiv.style.display = 'block';
+        msgDiv.textContent = 'Password must be at least 6 characters.';
+        msgDiv.className = 'message error';
+        return;
+    }
+    
+    const submitBtn = event.target;
+    const originalText = submitBtn.innerHTML;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Resetting...';
+    
+    try {
+        const response = await fetch(`${API_BASE}/api/auth/reset-password`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token, new_password: newPassword })
+        });
+        const data = await response.json();
+        msgDiv.style.display = 'block';
+        
+        if (response.ok) {
+            msgDiv.textContent = data.message || 'Password reset successful! Redirecting to login...';
+            msgDiv.className = 'message success';
+            setTimeout(() => {
+                window.location.href = '/';
+            }, 2000);
+        } else {
+            msgDiv.textContent = data.error || 'Failed to reset password.';
+            msgDiv.className = 'message error';
+        }
+    } catch (error) {
+        msgDiv.style.display = 'block';
+        msgDiv.textContent = 'Network error: ' + error.message;
+        msgDiv.className = 'message error';
+        console.error('Reset password error:', error);
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+    }
+}
 // API Base URL
 const API_BASE = window.location.origin;
 let authToken = null;
@@ -5,7 +159,15 @@ let currentUser = null;
 
 // Initialize app
 document.addEventListener('DOMContentLoaded', () => {
-    checkAuth();
+    const urlParams = new URLSearchParams(window.location.search);
+    const resetToken = urlParams.get('token');
+    
+    // If reset token is present, show reset password page instead of checking auth
+    if (resetToken) {
+        checkResetPasswordToken();
+    } else {
+        checkAuth();
+    }
 });
 
 // ==================== Authentication ====================

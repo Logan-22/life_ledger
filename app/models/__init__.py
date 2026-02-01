@@ -14,6 +14,10 @@ class User(db.Model, UserMixin):
     calorie_goal = db.Column(db.Integer, default=2000)  # Daily calorie goal
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
+    # Password reset fields
+    reset_token = db.Column(db.String(255), unique=True, nullable=True)
+    reset_token_expiry = db.Column(db.DateTime, nullable=True)
+    
     # Relationships
     habits = db.relationship('Habit', backref='user', lazy='dynamic', cascade='all, delete-orphan')
     diet_entries = db.relationship('DietEntry', backref='user', lazy='dynamic', cascade='all, delete-orphan')
